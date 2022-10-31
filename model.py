@@ -16,11 +16,9 @@ class GCNNet(nn.Module):
     def forward(self, nodes_feature, edge_index):
         x = self.conv1(nodes_feature, edge_index)
         x = F.leaky_relu_(x)
-        # x = F.dropout(x, training=self.training)
         x = self.conv2(x, edge_index)
         x = F.leaky_relu_(x)
         return x
-        # return F.log_softmax(x, dim=1)
 
 
 class HyperGCN(nn.Module):
@@ -33,11 +31,9 @@ class HyperGCN(nn.Module):
     def forward(self, nodes_features, hyperedge_index):
         x = self.conv1(nodes_features, hyperedge_index)
         x = F.leaky_relu_(x)
-        # x = F.dropout(x, training=self.training)
         x = self.conv2(x, hyperedge_index)
         x = F.leaky_relu_(x)
         return x
-        # return F.log_softmax(x, dim=1)
 
 
 class Contrast(nn.Module):
@@ -56,19 +52,10 @@ class Contrast(nn.Module):
         return self.InfoNCELoss(nodes_map, edges_map)
 
     def InfoNCELoss(self, nodes_map, edges_map):
-        # similarity function 1: negative distance
-        # map_bias = nodes_map - edges_map
-        # map_dif = nodes_map.unsqueeze(dim=1) - edges_map.unsqueeze(dim=0)
-        # MI = torch.exp(-map_bias.norm(p=2, dim=-1))
-        # MI_total = torch.exp(-map_dif.norm(p=2, dim=-1))
-
-        # similarity function 2: negative inner-product
         nodes_norm = nodes_map.norm(p=2, dim=-1)
         edges_norm = edges_map.norm(p=2, dim=-1)
         inner_product = torch.mul(nodes_map, edges_map).sum(dim=-1) / (nodes_norm * edges_norm)
         mat_product = torch.matmul(nodes_map, edges_map.T) / (nodes_norm.unsqueeze(dim=1) * edges_norm.unsqueeze(dim=0))
-        # MI = torch.exp(inner_product / self.t)
-        # MI_total = torch.exp(mat_product / self.t)
         MI = torch.exp(-torch.abs(inner_product) / self.t)
         MI_total = torch.exp(-torch.abs(mat_product) / self.t)
         prop = 2 * MI / (MI_total.sum(dim=0) + MI_total.sum(dim=1))
