@@ -84,10 +84,6 @@ def main(args):
         edges_embedding = net.hypergcn(edges_feature, hyperedge_index)
         logging.info(nodes_embedding)
         logging.info(edges_embedding)
-        # file_nodes = args.save_path + '/' + args.dataset
-        # file_edges = args.save_path + '/' + args.dataset + '_edge'
-        # np.save(file_nodes, nodes_embedding.cpu().numpy())
-        # np.save(file_edges, edges_embedding.cpu().numpy())
 
     logging.info('-----------------------Node Classification-----------------------')
     nc = NodeClassification(embedding_dim, label_num).to(device)
@@ -105,8 +101,6 @@ def main(args):
             nc.eval()
             acc_1 = nc.evaluate(nodes_embedding[val_mask], nodes_label[val_mask])
             acc_2 = nc.evaluate(nodes_embedding[test_mask], nodes_label[test_mask])
-            # acc_1 = nc.evaluate(nodes_feature[val_mask], nodes_label[val_mask])
-            # acc_2 = nc.evaluate(nodes_feature[test_mask], nodes_label[test_mask])
             logging.info('Val Accuracy: {}'.format(acc_1.item()))
             logging.info('Test Accuracy: {}'.format(acc_2.item()))
             nc.train()
